@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError } = require('../errors')
+const { createJWTtoken } = require('../utils/index')
 
 const register = async (req, res) => {
   const { name, password, email } = req.body
@@ -11,7 +12,13 @@ const register = async (req, res) => {
     )
   }
   const user = await User.create({ name, password, email })
-  res.status(StatusCodes.CREATED).json(user)
+  const tokenUser = {
+    name: user.name,
+    id: user._id,
+    role: user.role
+  }
+  const token = createJWTtoken(tokenUser)
+  res.status(StatusCodes.CREATED).json({ user, token })
 }
 
 const login = async (req, res) => {
