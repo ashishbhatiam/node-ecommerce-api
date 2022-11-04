@@ -8,6 +8,7 @@ const connectDB = require('./db/connect')
 
 // Extra Packages
 const morgan = require('morgan')
+const cookieParser = require('cookie-parser')
 
 // router
 const authRouter = require('./routes/auth')
@@ -20,6 +21,7 @@ const port = process.env.PORT || 5001
 
 app.use(express.json())
 app.use(morgan('tiny'))
+app.use(cookieParser(process.env.JWT_SECRET))
 
 // Routes
 app.use('/api/v1/auth', authRouter)
