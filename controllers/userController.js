@@ -3,7 +3,7 @@ const getAllUsers = async (req, res) => {
 }
 
 const getSingleUser = async (req, res) => {
-  res.send('Get Single User!')
+  res.send(req.params)
 }
 
 const getCurrentUser = async (req, res) => {
@@ -11,11 +11,11 @@ const getCurrentUser = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-  res.send('Update User!')
+  res.send(req.body)
 }
 
 const updateUserPassword = async (req, res) => {
-  res.send('Update User Password!')
+  res.send(req.body)
 }
 
 module.exports = {
