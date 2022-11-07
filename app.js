@@ -18,7 +18,7 @@ const userRouter = require('./routes/userRoutes')
 // middlewares
 const notFoundMiddleware = require('./middleware/not-found')
 const errorHandlerMiddleware = require('./middleware/error-handler')
-const authenticateUserMiddleware = require('./middleware/authentication')
+const { authenticateUserMiddleware } = require('./middleware/authentication')
 
 const port = process.env.PORT || 5001
 

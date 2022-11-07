@@ -1,6 +1,7 @@
-const { UnauthenticatedError } = require('../errors')
+const { UnauthenticatedError, UnauthorizedError } = require('../errors')
 const { isTokenValid } = require('../utils')
-const authenticateUser = (req, res, next) => {
+
+const authenticateUserMiddleware = (req, res, next) => {
   const token = req.signedCookies.token
   if (!token) {
     throw new UnauthenticatedError('Authentication failed')
@@ -18,4 +19,16 @@ const authenticateUser = (req, res, next) => {
   }
 }
 
-module.exports = authenticateUser
+const authorizePermissonsMiddleware = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      throw new UnauthorizedError('Unauthorized to access this route.')
+    }
+    next()
+  }
+}
+
+module.exports = {
+  authenticateUserMiddleware,
+  authorizePermissonsMiddleware
+}
