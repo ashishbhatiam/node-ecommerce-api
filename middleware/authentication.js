@@ -10,7 +10,7 @@ const authenticateUserMiddleware = (req, res, next) => {
     const payload = isTokenValid(token)
     req.user = {
       name: payload.name,
-      id: payload._id,
+      id: payload.id,
       role: payload.role
     }
     next()

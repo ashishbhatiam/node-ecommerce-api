@@ -1,6 +1,10 @@
 const User = require('../models/User')
 const { StatusCodes } = require('http-status-codes')
-const { NotFoundError } = require('../errors')
+const {
+  NotFoundError,
+  BadRequestError,
+  UnauthenticatedError
+} = require('../errors')
 
 const getAllUsers = async (req, res) => {
   const users = await User.find({ role: 'user' }).select('-password')
@@ -17,7 +21,7 @@ const getSingleUser = async (req, res) => {
 }
 
 const getCurrentUser = async (req, res) => {
-  res.send('Get Current User!')
+  res.status(StatusCodes.OK).json({ user: req.user })
 }
 
 const updateUser = async (req, res) => {
@@ -25,7 +29,18 @@ const updateUser = async (req, res) => {
 }
 
 const updateUserPassword = async (req, res) => {
-  res.send(req.body)
+  const { old_password, new_password } = req.body
+  if (!old_password || !new_password) {
+    throw new BadRequestError('Please provide old & new passwords.')
+  }
+  const user = await User.findOne({ _id: req.user.id })
+  const isPasswordMatch = await user.comparePassword(old_password)
+  if (!isPasswordMatch) {
+    throw new UnauthenticatedError('Incorrect credentails.')
+  }
+  user.password = new_password
+  await user.save()
+  res.status(StatusCodes.OK).end()
 }
 
 module.exports = {
