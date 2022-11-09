@@ -1,4 +1,4 @@
-const createUserToken = user => {
+const createTokenUser = user => {
   return {
     name: user.name,
     id: user._id,
@@ -6,4 +6,4 @@ const createUserToken = user => {
   }
 }
 
-module.exports = createUserToken
+module.exports = createTokenUser
