@@ -6,7 +6,8 @@ const {
   getSingleProduct,
   deleteProduct,
   updateProduct,
-  uploadImage
+  uploadImage,
+  uploadImageLocal
 } = require('../controllers/productController')
 const {
   authorizePermissonsMiddleware
@@ -21,6 +22,10 @@ router
 router
   .route('/uploadImage')
   .post(authorizePermissonsMiddleware(admin_role), uploadImage)
+
+  router
+  .route('/uploadImageLocal')
+  .post(authorizePermissonsMiddleware(admin_role), uploadImageLocal)
 
 router
   .route('/:id')

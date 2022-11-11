@@ -1,6 +1,8 @@
 const Product = require('../models/Product')
 const { StatusCodes } = require('http-status-codes')
 const { NotFoundError, BadRequestError } = require('../errors')
+const { formatBytes } = require('../utils')
+const path = require('path')
 
 const createProduct = async (req, res) => {
   req.body.user = req.user.id
@@ -74,6 +76,38 @@ const deleteProduct = async (req, res) => {
   res.status(StatusCodes.NO_CONTENT).end()
 }
 
+const uploadImageLocal = async (req, res) => {
+  if (!req.files || !req.files.image) {
+    throw new BadRequestError('Please provide product image file.')
+  }
+  const productImage = req.files.image
+  // File type validation
+  if (!productImage.mimetype.startsWith('image')) {
+    throw new BadRequestError('Please upload Image type file.')
+  }
+
+  // File size validation
+  const maxSize = 1024 * 2048
+  if (productImage.size > maxSize) {
+    throw new BadRequestError(
+      `Please Upload Image smaller than ${formatBytes(maxSize)}.`
+    )
+  }
+
+  const imagePath = path.join(
+    __dirname,
+    '../public',
+    `/uploads/${productImage.name}`
+  )
+
+  await productImage.mv(imagePath)
+
+  res.status(StatusCodes.CREATED).json({
+    image: `/uploads/${productImage.name}`,
+    size: formatBytes(productImage.size)
+  })
+}
+
 const uploadImage = async (req, res) => {
   res.send('Upload Product Image')
 }
@@ -83,6 +117,7 @@ module.exports = {
   createProduct,
   getSingleProduct,
   updateProduct,
+  deleteProduct,
   uploadImage,
-  deleteProduct
+  uploadImageLocal
 }

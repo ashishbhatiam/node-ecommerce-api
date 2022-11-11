@@ -10,6 +10,15 @@ const connectDB = require('./db/connect')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
+const expressFileUpload = require('express-fileupload')
+
+const cloudinary = require('cloudinary').v2
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+  secure: true
+})
 
 // router
 const authRouter = require('./routes/authRoutes')
@@ -27,6 +36,9 @@ app.use(express.json())
 app.use(morgan('tiny'))
 app.use(cookieParser(process.env.JWT_SECRET))
 app.use(cors())
+
+app.use(express.static('./public'))
+app.use(expressFileUpload())
 
 // Routes
 app.use('/api/v1/auth', authRouter)
