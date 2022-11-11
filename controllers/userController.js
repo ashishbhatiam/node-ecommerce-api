@@ -12,7 +12,7 @@ const {
 } = require('../utils')
 
 const getAllUsers = async (req, res) => {
-  const users = await User.find({ role: 'user' }).select('-password')
+  const users = await User.find({}).select('-password')
   res.status(StatusCodes.OK).json({ users, count: users.length })
 }
 
