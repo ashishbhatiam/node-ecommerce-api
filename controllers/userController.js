@@ -5,7 +5,11 @@ const {
   BadRequestError,
   UnauthenticatedError
 } = require('../errors')
-const { createTokenUser, attachCookiesToResponse } = require('../utils')
+const {
+  createTokenUser,
+  attachCookiesToResponse,
+  checkPermission
+} = require('../utils')
 
 const getAllUsers = async (req, res) => {
   const users = await User.find({ role: 'user' }).select('-password')
@@ -14,10 +18,11 @@ const getAllUsers = async (req, res) => {
 
 const getSingleUser = async (req, res) => {
   const { id } = req.params
-  const user = await User.findOne({ _id: id, role: 'user' }).select('-password')
+  const user = await User.findOne({ _id: id }).select('-password')
   if (!user) {
     throw new NotFoundError(`No user found with id: ${id}.`)
   }
+  checkPermission(req.user, user._id)
   res.status(StatusCodes.OK).json(user)
 }
 

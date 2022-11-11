@@ -5,6 +5,7 @@ const {
 } = require('./jwt')
 const { admin_role, user_role } = require('./constants')
 const createTokenUser = require('./createTokenUser')
+const checkPermission = require('./checkPermission')
 
 module.exports = {
   createJWTtoken,
@@ -12,5 +13,6 @@ module.exports = {
   attachCookiesToResponse,
   admin_role,
   user_role,
-  createTokenUser
+  createTokenUser,
+  checkPermission
 }
