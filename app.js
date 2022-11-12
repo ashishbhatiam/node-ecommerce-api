@@ -24,6 +24,7 @@ cloudinary.config({
 const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoutes')
 const productRouter = require('./routes/productRoutes')
+const reviewRouter = require('./routes/reviewRoutes')
 
 // middlewares
 const notFoundMiddleware = require('./middleware/not-found')
@@ -44,6 +45,7 @@ app.use(expressFileUpload())
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/users', authenticateUserMiddleware, userRouter)
 app.use('/api/v1/products', authenticateUserMiddleware, productRouter)
+app.use('/api/v1/reviews', authenticateUserMiddleware, reviewRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorHandlerMiddleware)
