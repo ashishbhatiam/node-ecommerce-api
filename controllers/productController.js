@@ -75,7 +75,7 @@ const deleteProduct = async (req, res) => {
   if (!product) {
     throw new NotFoundError(`No product found with id: ${productId}.`)
   }
-  res.status(StatusCodes.NO_CONTENT).end()
+  res.status(StatusCodes.OK).end()
 }
 
 const uploadImageLocal = async (req, res) => {
