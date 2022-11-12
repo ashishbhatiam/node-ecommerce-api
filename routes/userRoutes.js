@@ -10,14 +10,22 @@ const {
 } = require('../controllers/userController')
 
 const {
+  authenticateUserMiddleware,
   authorizePermissonsMiddleware
 } = require('../middleware/authentication')
 const { admin_role } = require('../utils')
 
-router.route('/').get(authorizePermissonsMiddleware(admin_role), getAllUsers)
-router.route('/me').get(getCurrentUser)
-router.route('/updateUser').patch(updateUser)
-router.route('/updateUserPassword').patch(updateUserPassword)
-router.route('/:id').get(getSingleUser)
+router
+  .route('/')
+  .get(
+    [authenticateUserMiddleware, authorizePermissonsMiddleware(admin_role)],
+    getAllUsers
+  )
+router.route('/me').get(authenticateUserMiddleware, getCurrentUser)
+router.route('/updateUser').patch(authenticateUserMiddleware, updateUser)
+router
+  .route('/updateUserPassword')
+  .patch(authenticateUserMiddleware, updateUserPassword)
+router.route('/:id').get(authenticateUserMiddleware, getSingleUser)
 
 module.exports = router

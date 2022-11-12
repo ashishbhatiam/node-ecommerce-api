@@ -10,6 +10,7 @@ const {
   uploadImageLocal
 } = require('../controllers/productController')
 const {
+  authenticateUserMiddleware,
   authorizePermissonsMiddleware
 } = require('../middleware/authentication')
 const { admin_role } = require('../utils')
@@ -17,20 +18,35 @@ const { admin_role } = require('../utils')
 router
   .route('/')
   .get(getAllProducts)
-  .post(authorizePermissonsMiddleware(admin_role), createProduct)
+  .post(
+    [authenticateUserMiddleware, authorizePermissonsMiddleware(admin_role)],
+    createProduct
+  )
 
 router
   .route('/uploadImage')
-  .post(authorizePermissonsMiddleware(admin_role), uploadImage)
+  .post(
+    [authenticateUserMiddleware, authorizePermissonsMiddleware(admin_role)],
+    uploadImage
+  )
 
-  router
+router
   .route('/uploadImageLocal')
-  .post(authorizePermissonsMiddleware(admin_role), uploadImageLocal)
+  .post(
+    [authenticateUserMiddleware, authorizePermissonsMiddleware(admin_role)],
+    uploadImageLocal
+  )
 
 router
   .route('/:id')
   .get(getSingleProduct)
-  .patch(authorizePermissonsMiddleware(admin_role), updateProduct)
-  .delete(authorizePermissonsMiddleware(admin_role), deleteProduct)
+  .patch(
+    [authenticateUserMiddleware, authorizePermissonsMiddleware(admin_role)],
+    updateProduct
+  )
+  .delete(
+    [authenticateUserMiddleware, authorizePermissonsMiddleware(admin_role)],
+    deleteProduct
+  )
 
 module.exports = router
