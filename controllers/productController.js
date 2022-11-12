@@ -3,6 +3,8 @@ const { StatusCodes } = require('http-status-codes')
 const { NotFoundError, BadRequestError } = require('../errors')
 const { formatBytes } = require('../utils')
 const path = require('path')
+const fs = require('fs')
+const cloudinary = require('cloudinary').v2
 
 const createProduct = async (req, res) => {
   req.body.user = req.user.id
@@ -109,7 +111,43 @@ const uploadImageLocal = async (req, res) => {
 }
 
 const uploadImage = async (req, res) => {
-  res.send('Upload Product Image')
+  if (!req.files || !req.files.image) {
+    throw new BadRequestError('Please provide product image file.')
+  }
+  const productImage = req.files.image
+  // File type validation
+  if (!productImage.mimetype.startsWith('image')) {
+    throw new BadRequestError('Please upload Image type file.')
+  }
+
+  // File size validation
+  const maxSize = 1024 * 2048
+  if (productImage.size > maxSize) {
+    throw new BadRequestError(
+      `Please Upload Image smaller than ${formatBytes(maxSize)}.`
+    )
+  }
+
+  // Creating temp file
+  const imagePath = path.join(__dirname, '../tmp/', productImage.name)
+  await productImage.mv(imagePath)
+
+  // Upload API call
+  const result = await cloudinary.uploader.upload(imagePath, {
+    use_filename: true,
+    folder:
+      process.env.NODE_ENV === 'production'
+        ? 'e-commerce-api-live'
+        : 'e-commerce-api-dev'
+  })
+
+  // Unlink/Removing temp file
+  fs.unlinkSync(imagePath)
+
+  res.status(StatusCodes.CREATED).json({
+    image: result.secure_url,
+    size: formatBytes(result.bytes)
+  })
 }
 
 module.exports = {
