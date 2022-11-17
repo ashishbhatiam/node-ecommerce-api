@@ -16,16 +16,19 @@ const getAllProducts = async (req, res) => {
   const products = await Product.find({})
     .sort('-createdAt')
     .populate({ path: 'user', select: 'name email' })
+    .populate('reviews')
 
   res.status(StatusCodes.OK).json({ products, count: products.length })
 }
 
 const getSingleProduct = async (req, res) => {
   const productId = req.params.id
-  const product = await Product.findOne({ _id: productId }).populate({
-    path: 'user',
-    select: 'name email'
-  })
+  const product = await Product.findOne({ _id: productId })
+    .populate({
+      path: 'user',
+      select: 'name email'
+    })
+    .populate('reviews')
 
   if (!product) {
     throw new NotFoundError(`No product found with id: ${productId}.`)
@@ -69,7 +72,9 @@ const updateProduct = async (req, res) => {
   const product = await Product.findOneAndUpdate({ _id: productId }, values, {
     new: true,
     runValidators: true
-  }).populate({ path: 'user', select: 'name email' })
+  })
+    .populate({ path: 'user', select: 'name email' })
+    .populate('reviews')
 
   if (!product) {
     throw new NotFoundError(`No product found with id: ${productId}.`)
