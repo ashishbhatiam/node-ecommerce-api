@@ -36,14 +36,24 @@ const getAllReviews = async (req, res) => {
     throw new BadRequestError(`please provide product.`)
   }
 
-  const reviews = await Review.find({ product: productId }).sort('-createdAt')
-  res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
+  const reviews = await Review.find({ product: productId })
+    .sort('-createdAt')
+    .populate({ path: 'product', select: 'name price company' })
+    .populate({ path: 'user', select: 'name email' })
+  
+    res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
 }
 
 const getSingleReview = async (req, res) => {
   const { id: reviewId } = req.params
 
   const review = await Review.findOne({ _id: reviewId })
+    .populate({
+      path: 'product',
+      select: 'name price company'
+    })
+    .populate({ path: 'user', select: 'name email' })
+
   if (!review) {
     throw new NotFoundError(`No review found with id: ${reviewId}.`)
   }
@@ -55,6 +65,12 @@ const updateReview = async (req, res) => {
   const { id: reviewId } = req.params
   const { title, comment, rating } = req.body
   let review = await Review.findOne({ _id: reviewId })
+    .populate({
+      path: 'product',
+      select: 'name price company'
+    })
+    .populate({ path: 'user', select: 'name email' })
+
   if (!review) {
     throw new NotFoundError(`No review found with id: ${reviewId}.`)
   }
