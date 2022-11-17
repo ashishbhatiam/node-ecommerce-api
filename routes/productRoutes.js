@@ -9,6 +9,7 @@ const {
   uploadImage,
   uploadImageLocal
 } = require('../controllers/productController')
+const { getSingleProductReviews } = require('../controllers/reviewController')
 const {
   authenticateUserMiddleware,
   authorizePermissonsMiddleware
@@ -48,5 +49,7 @@ router
     [authenticateUserMiddleware, authorizePermissonsMiddleware(admin_role)],
     deleteProduct
   )
+
+router.route('/:id/reviews').get(getSingleProductReviews)
 
 module.exports = router

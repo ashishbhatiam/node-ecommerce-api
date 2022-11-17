@@ -30,6 +30,15 @@ const createReview = async (req, res) => {
 }
 
 const getAllReviews = async (req, res) => {
+  const reviews = await Review.find({})
+    .sort('-createdAt')
+    .populate({ path: 'product', select: 'name price company' })
+    .populate({ path: 'user', select: 'name email' })
+
+  res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
+}
+
+const getAllProductReviews = async (req, res) => {
   const { productId } = req.query
 
   if (!productId) {
@@ -40,8 +49,8 @@ const getAllReviews = async (req, res) => {
     .sort('-createdAt')
     .populate({ path: 'product', select: 'name price company' })
     .populate({ path: 'user', select: 'name email' })
-  
-    res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
+
+  res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
 }
 
 const getSingleReview = async (req, res) => {
@@ -97,10 +106,19 @@ const deleteReview = async (req, res) => {
   res.status(StatusCodes.OK).end()
 }
 
+const getSingleProductReviews = async (req, res) => {
+  const { id: productId } = req.params
+
+  const reviews = await Review.find({ product: productId })
+  res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
+}
+
 module.exports = {
   createReview,
-  getAllReviews,
+  getAllProductReviews,
   getSingleReview,
   updateReview,
-  deleteReview
+  deleteReview,
+  getAllReviews,
+  getSingleProductReviews
 }
