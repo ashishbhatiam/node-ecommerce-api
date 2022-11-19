@@ -51,12 +51,14 @@ const ProductSchema = new mongoose.Schema(
     },
     inventory: {
       type: Number,
-      required: [true, 'Please provide product inventory'],
       default: 0
     },
     averageRating: {
       type: Number,
-      required: [true, 'Please provide product average rating'],
+      default: 0
+    },
+    totalRating: {
+      type: Number,
       default: 0
     },
     user: {
@@ -72,6 +74,7 @@ const ProductSchema = new mongoose.Schema(
   }
 )
 
+// Virtuals
 ProductSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
@@ -79,6 +82,7 @@ ProductSchema.virtual('reviews', {
   justOne: false
 })
 
+// remove hook
 ProductSchema.pre('remove', async function (next) {
   await this.model('Review').deleteMany({ product: this._id })
   next()

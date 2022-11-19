@@ -35,12 +35,10 @@ const getAllReviews = async (req, res) => {
   if (productId) {
     reviews = await Review.find({ product: productId })
       .sort('-createdAt')
-      .populate({ path: 'product', select: 'name price company' })
       .populate({ path: 'user', select: 'name email' })
   } else {
     reviews = await Review.find({})
       .sort('-createdAt')
-      .populate({ path: 'product', select: 'name price company' })
       .populate({ path: 'user', select: 'name email' })
   }
 
@@ -50,12 +48,10 @@ const getAllReviews = async (req, res) => {
 const getSingleReview = async (req, res) => {
   const { id: reviewId } = req.params
 
-  const review = await Review.findOne({ _id: reviewId })
-    .populate({
-      path: 'product',
-      select: 'name price company'
-    })
-    .populate({ path: 'user', select: 'name email' })
+  const review = await Review.findOne({ _id: reviewId }).populate({
+    path: 'user',
+    select: 'name email'
+  })
 
   if (!review) {
     throw new NotFoundError(`No review found with id: ${reviewId}.`)
@@ -67,12 +63,10 @@ const getSingleReview = async (req, res) => {
 const updateReview = async (req, res) => {
   const { id: reviewId } = req.params
   const { title, comment, rating } = req.body
-  let review = await Review.findOne({ _id: reviewId })
-    .populate({
-      path: 'product',
-      select: 'name price company'
-    })
-    .populate({ path: 'user', select: 'name email' })
+  let review = await Review.findOne({ _id: reviewId }).populate({
+    path: 'user',
+    select: 'name email'
+  })
 
   if (!review) {
     throw new NotFoundError(`No review found with id: ${reviewId}.`)
