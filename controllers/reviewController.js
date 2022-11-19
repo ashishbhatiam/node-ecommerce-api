@@ -31,20 +31,18 @@ const createReview = async (req, res) => {
 
 const getAllReviews = async (req, res) => {
   const { productId } = req.query
-
-  if (!productId) {
-    const reviews = await Review.find({})
+  let reviews = []
+  if (productId) {
+    reviews = await Review.find({ product: productId })
       .sort('-createdAt')
       .populate({ path: 'product', select: 'name price company' })
       .populate({ path: 'user', select: 'name email' })
-
-    res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
+  } else {
+    reviews = await Review.find({})
+      .sort('-createdAt')
+      .populate({ path: 'product', select: 'name price company' })
+      .populate({ path: 'user', select: 'name email' })
   }
-
-  const reviews = await Review.find({ product: productId })
-    .sort('-createdAt')
-    .populate({ path: 'product', select: 'name price company' })
-    .populate({ path: 'user', select: 'name email' })
 
   res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
 }
