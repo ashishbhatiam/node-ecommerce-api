@@ -2,7 +2,6 @@ const express = require('express')
 const router = express.Router()
 const {
   createReview,
-  getAllProductReviews,
   getSingleReview,
   updateReview,
   deleteReview,
@@ -12,10 +11,8 @@ const { authenticateUserMiddleware } = require('../middleware/authentication')
 
 router
   .route('/')
-  .get(getAllProductReviews)
+  .get(getAllReviews)
   .post(authenticateUserMiddleware, createReview)
-
-router.route('/all').get(getAllReviews)
 
 router
   .route('/:id')

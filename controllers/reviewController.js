@@ -30,19 +30,15 @@ const createReview = async (req, res) => {
 }
 
 const getAllReviews = async (req, res) => {
-  const reviews = await Review.find({})
-    .sort('-createdAt')
-    .populate({ path: 'product', select: 'name price company' })
-    .populate({ path: 'user', select: 'name email' })
-
-  res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
-}
-
-const getAllProductReviews = async (req, res) => {
   const { productId } = req.query
 
   if (!productId) {
-    throw new BadRequestError(`please provide product.`)
+    const reviews = await Review.find({})
+      .sort('-createdAt')
+      .populate({ path: 'product', select: 'name price company' })
+      .populate({ path: 'user', select: 'name email' })
+
+    res.status(StatusCodes.OK).json({ reviews, count: reviews.length })
   }
 
   const reviews = await Review.find({ product: productId })
@@ -115,7 +111,6 @@ const getSingleProductReviews = async (req, res) => {
 
 module.exports = {
   createReview,
-  getAllProductReviews,
   getSingleReview,
   updateReview,
   deleteReview,
