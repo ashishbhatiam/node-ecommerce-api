@@ -33,23 +33,51 @@ const ReviewSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-// Static Functions (used in a schema/model)
+ReviewSchema.index({ product: 1, user: 1 }, { unique: true })
+
+// Static Functions (used in a schema/model) to calculate Product Average rating & No. of reviews
 ReviewSchema.statics.calculateAverageRating = async function (productID) {
-  console.log('productID: ', productID)
+  const result = await this.aggregate([
+    // Stage 1
+    {
+      $match: {
+        product: productID
+      }
+    },
+    // Stage 2
+    {
+      $group: {
+        _id: null,
+        averageRating: {
+          $avg: '$rating'
+        },
+        numOfReviews: {
+          $sum: 1
+        }
+      }
+    }
+  ])
+  try {
+    await this.model('Product').findOneAndUpdate(
+      { _id: productID },
+      {
+        averageRating: result[0]?.averageRating || 0,
+        numOfReviews: result[0]?.numOfReviews || 0
+      }
+    )
+  } catch (error) {
+    console.log('error: ', error)
+  }
 }
 
 // save hook
-ReviewSchema.pre('save', async function (next) {
+ReviewSchema.post('save', async function () {
   await this.constructor.calculateAverageRating(this.product)
-  next()
 })
 
 // remove hook
-ReviewSchema.pre('remove', async function (next) {
+ReviewSchema.post('remove', async function () {
   await this.constructor.calculateAverageRating(this.product)
-  next()
 })
-
-ReviewSchema.index({ product: 1, user: 1 }, { unique: true })
 
 module.exports = mongoose.model('Review', ReviewSchema)
