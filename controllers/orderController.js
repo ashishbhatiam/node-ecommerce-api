@@ -3,17 +3,28 @@ const Order = require('../models/Order')
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const { BadRequestError, NotFoundError } = require('../errors')
 const { StatusCodes } = require('http-status-codes')
+const { checkPermission, stripe_status } = require('../utils')
 
 const getAllOrders = async (req, res) => {
-  res.send('Get All Orders')
+  const orders = await Order.find({})
+  res.status(StatusCodes.OK).json({ orders, count: orders.length })
 }
 
 const getSingleOrder = async (req, res) => {
-  res.send('Get Single Order')
+  const { id: orderId } = req.params
+  const order = await Order.findOne({ _id: orderId })
+  if (!order) {
+    throw new NotFoundError(`No order found with id: ${orderId}`)
+  }
+  checkPermission(req.user, order.user)
+  res.status(StatusCodes.OK).json(order)
 }
 
 const getCurrentUserOrders = async (req, res) => {
-  res.send('Get Current User Orders')
+  const currentUserOrders = await Order.find({ user: req.user.id })
+  res
+    .status(StatusCodes.OK)
+    .json({ orders: currentUserOrders, count: currentUserOrders.length })
 }
 
 const createOrder = async (req, res) => {
@@ -74,7 +85,32 @@ const createOrder = async (req, res) => {
 }
 
 const updateOrder = async (req, res) => {
-  res.send('Update Order')
+  const { paymentIntentId } = req.body
+  const { id: orderID } = req.params
+
+  // Get Order
+  let order = await Order.findOne({ _id: orderID })
+  if (!order) {
+    throw new NotFoundError(`No order found with id: ${orderID}`)
+  }
+
+  // Check Permissions
+  checkPermission(req.user, order.user)
+
+  // Retrieve Stripe Payment Intent
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+
+  // Update order status as per the payment status
+  if (paymentIntent.status === stripe_status.succeeded) {
+    order.status = 'paid'
+  } else if (paymentIntent.status === stripe_status.canceled) {
+    order.status = 'cancelled'
+  } else if (paymentIntent.status === stripe_status.requires_payment_method) {
+    order.status = 'failed'
+  }
+  await order.save()
+
+  res.status(StatusCodes.OK).json(order)
 }
 
 module.exports = {
