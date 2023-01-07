@@ -6,6 +6,7 @@ const {
   NotFoundError
 } = require('../errors')
 const { attachCookiesToResponse, createTokenUser } = require('../utils/index')
+const crypto = require('crypto')
 
 const register = async (req, res) => {
   const { name, password, email } = req.body
@@ -15,12 +16,12 @@ const register = async (req, res) => {
       'Email already exists, Please try a different email.'
     )
   }
-  const user = await User.create({ name, password, email })
-  const tokenUser = createTokenUser(user)
-  // attach cookies to the response
-  attachCookiesToResponse(res, tokenUser)
+  const verificationToken = crypto.randomBytes(40).toString('hex')
+  const user = await User.create({ name, password, email, verificationToken })
+
   res.status(StatusCodes.CREATED).json({
-    user: tokenUser
+    msg: 'Success! Please check your email to verify acoount',
+    verificationToken: user.verificationToken
   })
 }
 
@@ -38,6 +39,11 @@ const login = async (req, res) => {
   if (!isPasswordMatched) {
     throw new UnauthenticatedError('Incorrect credentails.')
   }
+
+  if (!user.isVerified) {
+    throw new UnauthenticatedError('Please verify your email.')
+  }
+
   const tokenUser = createTokenUser(user)
   // attach cookies to the response
   attachCookiesToResponse(res, tokenUser)
