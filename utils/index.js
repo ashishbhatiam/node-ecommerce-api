@@ -7,6 +7,7 @@ const { admin_role, user_role, stripe_status } = require('./constants')
 const createTokenUser = require('./createTokenUser')
 const checkPermission = require('./checkPermission')
 const { formatBytes } = require('./helper')
+const { sendEmailLocal, sendEmail } = require('./sendEmail')
 
 module.exports = {
   createJWTtoken,
@@ -17,5 +18,7 @@ module.exports = {
   stripe_status,
   createTokenUser,
   checkPermission,
-  formatBytes
+  formatBytes,
+  sendEmailLocal,
+  sendEmail
 }

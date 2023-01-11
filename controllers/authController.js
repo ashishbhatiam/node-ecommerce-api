@@ -5,7 +5,12 @@ const {
   UnauthenticatedError,
   NotFoundError
 } = require('../errors')
-const { attachCookiesToResponse, createTokenUser } = require('../utils/index')
+const {
+  attachCookiesToResponse,
+  createTokenUser,
+  sendEmailLocal,
+  sendEmail
+} = require('../utils/index')
 const crypto = require('crypto')
 
 const register = async (req, res) => {
@@ -18,10 +23,15 @@ const register = async (req, res) => {
   }
   const verificationToken = crypto.randomBytes(40).toString('hex')
   const user = await User.create({ name, password, email, verificationToken })
+  const origin = `${req.protocol}://${req.get('host')}`
+  const link = `${origin}/user/verify-email?token=${user.verificationToken}&email=${user.email}`
+
+  const msgText = `<h4>Hey ${user.name}, </h4><p>Verify your email by clicking the <a href="${link}">link</a>.</p>`
+  await sendEmailLocal(user.email, 'Email Confirmation', msgText)
+  // await sendEmail(user.email, 'Email Confirmation', msgText)
 
   res.status(StatusCodes.CREATED).json({
-    msg: 'Success! Please check your email to verify acoount',
-    verificationToken: user.verificationToken
+    msg: 'Success! Please check your email to verify acoount'
   })
 }
 
