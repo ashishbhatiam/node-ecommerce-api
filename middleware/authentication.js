@@ -1,18 +1,35 @@
 const { UnauthenticatedError, UnauthorizedError } = require('../errors')
-const { isTokenValid } = require('../utils')
+const { isTokenValid, attachCookiesToResponse } = require('../utils')
+const Token = require('../models/Token')
 
-const authenticateUserMiddleware = (req, res, next) => {
-  const token = req.signedCookies.token
-  if (!token) {
-    throw new UnauthenticatedError('Authentication failed')
-  }
+const authenticateUserMiddleware = async (req, res, next) => {
+  const { refreshToken, accessToken } = req.signedCookies
   try {
-    const payload = isTokenValid(token)
-    req.user = {
-      name: payload.name,
-      id: payload.id,
-      role: payload.role
+    if (accessToken) {
+      const payload = isTokenValid(accessToken)
+      const { name, id, role } = payload.user
+      req.user = {
+        name,
+        id,
+        role
+      }
+      return next()
     }
+    const payload = isTokenValid(refreshToken)
+    const {
+      user: { name, id: userId, role },
+      refreshToken: refreshTokenJWT
+    } = payload
+    const isTokenExists = await Token.findOne({ user: userId, refreshTokenJWT })
+    if (!isTokenExists || !isTokenExists?.isValid) {
+      throw new UnauthenticatedError('Authentication failed')
+    }
+    req.user = {
+      name,
+      id: userId,
+      role
+    }
+    attachCookiesToResponse(res, req.user, refreshTokenJWT)
     next()
   } catch (error) {
     throw new UnauthenticatedError('Authentication failed')
