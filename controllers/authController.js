@@ -12,6 +12,7 @@ const {
   sendEmail
 } = require('../utils/index')
 const crypto = require('crypto')
+const Token = require('../models/Token')
 
 const register = async (req, res) => {
   const { name, password, email } = req.body
@@ -55,8 +56,40 @@ const login = async (req, res) => {
   }
 
   const tokenUser = createTokenUser(user)
+
+  let refreshToken = ''
+
+  // check existing refreshToken
+  const isTokenExists = await Token.findOne({ user: user._id })
+  if (isTokenExists) {
+    if (!isTokenExists.isValid) {
+      throw new UnauthenticatedError('Incorrect credentails.')
+    }
+    refreshToken = isTokenExists.refreshToken
+    // attach cookies to the response
+    attachCookiesToResponse(res, tokenUser, refreshToken)
+
+    res.status(StatusCodes.OK).json({
+      user: tokenUser
+    })
+    return
+  }
+
+  // create new refreshToken
+  const userAgent = req.get('user-agent')
+  const ip = req.ip
+  refreshToken = crypto.randomBytes(40).toString('hex')
+  const userToken = {
+    userAgent,
+    ip,
+    user: user._id,
+    refreshToken
+  }
+  await Token.create(userToken)
+
   // attach cookies to the response
-  attachCookiesToResponse(res, tokenUser)
+  attachCookiesToResponse(res, tokenUser, refreshToken)
+
   res.status(StatusCodes.OK).json({
     user: tokenUser
   })
