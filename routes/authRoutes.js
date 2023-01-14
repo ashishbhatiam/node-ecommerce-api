@@ -8,9 +8,11 @@ const {
   verifyEmail
 } = require('../controllers/authController')
 
+const { authenticateUserMiddleware } = require('../middleware/authentication')
+
 router.post('/login', login)
 router.post('/register', register)
-router.get('/logout', logout)
+router.delete('/logout', authenticateUserMiddleware, logout)
 router.post('/verify-email', verifyEmail)
 
 module.exports = router
