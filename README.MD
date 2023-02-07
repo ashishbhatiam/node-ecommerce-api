@@ -2,7 +2,7 @@
 
 An full E-Commerce API build with Nodejs, Express and Mongo
 
-- View **live demo** here: [ab-e-commerce-api.herokuapp.com](https://ab-e-commerce-api.herokuapp.com/)
+- View **live demo** here: [e-commerce-api-80cx.onrender.com](https://e-commerce-api-80cx.onrender.com/)
 
 
 ## Project Setup
